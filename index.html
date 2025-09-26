@@ -4,13 +4,56 @@
   <meta charset="UTF-8">
   <title>بازی جدول تناوبی</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 30px; background: #eef; }
-    input { margin: 10px; padding: 5px; width: 150px; }
-    button { padding: 10px 20px; font-size: 16px; }
-    #element { font-size: 24px; margin: 20px 0; }
-    #result { font-weight: bold; margin-top: 20px; }
-    #timer { font-size: 20px; color: darkred; margin-top: 10px; }
-  </style>
+    body {
+  font-family: sans-serif;
+  text-align: center;
+  padding: 20px;
+  background: #eef;
+  margin: 0;
+}
+
+h1 {
+  font-size: 1.8em;
+  margin-bottom: 20px;
+}
+
+#element {
+  font-size: 1.5em;
+  margin: 15px 0;
+}
+
+input, button {
+  width: 90%;
+  max-width: 300px;
+  padding: 12px;
+  margin: 10px auto;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+#result, #timer, #score {
+  font-size: 1.2em;
+  margin-top: 10px;
+}
+
+@media (min-width: 600px) {
+  input, button {
+    width: 200px;
+  }
+}
+      </style>
 </head>
 <body>
   <h1>🧪 بازی جدول تناوبی</h1>
