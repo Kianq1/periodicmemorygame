@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>بازی جدول تناوبی</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 30px; background: #eef; }
+    input { margin: 10px; padding: 5px; width: 150px; }
+    button { padding: 10px 20px; font-size: 16px; }
+    #element { font-size: 24px; margin: 20px 0; }
+    #result { font-weight: bold; margin-top: 20px; }
+    #timer { font-size: 20px; color: darkred; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>🧪 بازی جدول تناوبی</h1>
+  <p id="element"></p>
+  <input type="number" id="group" placeholder="شماره گروه">
+  <input type="number" id="period" placeholder="شماره دوره">
+  <button onclick="checkAnswer()">بررسی</button>
+  <p id="result"></p>
+  <p>⏱ زمان باقی‌مانده: <span id="timer">15</span> ثانیه</p>
+  <p>امتیاز: <span id="score">0</span> | رکورد: <span id="highscore">0</span></p>
+
+  <audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5f6e2b6f9c.mp3?filename=correct-answer-2-93648.mp3"></audio>
+  <audio id="wrongSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_1a4b2c3d4e.mp3?filename=wrong-answer-1-93649.mp3"></audio>
+
+  <script>
+    const elements = [
+  { name: "H", atomic: 1, group: 1, period: 1 },
+  { name: "He", atomic: 2, group: 18, period: 1 },
+  { name: "Li", atomic: 3, group: 1, period: 2 },
+  { name: "Be", atomic: 4, group: 2, period: 2 },
+  { name: "B", atomic: 5, group: 13, period: 2 },
+  { name: "C", atomic: 6, group: 14, period: 2 },
+  { name: "N", atomic: 7, group: 15, period: 2 },
+  { name: "O", atomic: 8, group: 16, period: 2 },
+  { name: "F", atomic: 9, group: 17, period: 2 },
+  { name: "Ne", atomic: 10, group: 18, period: 2 },
+  { name: "Na", atomic: 11, group: 1, period: 3 },
+  { name: "Mg", atomic: 12, group: 2, period: 3 },
+  { name: "Al", atomic: 13, group: 13, period: 3 },
+  { name: "Si", atomic: 14, group: 14, period: 3 },
+  { name: "P", atomic: 15, group: 15, period: 3 },
+  { name: "S", atomic: 16, group: 16, period: 3 },
+  { name: "Cl", atomic: 17, group: 17, period: 3 },
+  { name: "Ar", atomic: 18, group: 18, period: 3 },
+  { name: "K", atomic: 19, group: 1, period: 4 },
+  { name: "Ca", atomic: 20, group: 2, period: 4 },
+  { name: "Sc", atomic: 21, group: 3, period: 4 },
+  { name: "Ti", atomic: 22, group: 4, period: 4 },
+  { name: "V", atomic: 23, group: 5, period: 4 },
+  { name: "Cr", atomic: 24, group: 6, period: 4 },
+  { name: "Mn", atomic: 25, group: 7, period: 4 },
+  { name: "Fe", atomic: 26, group: 8, period: 4 },
+  { name: "Co", atomic: 27, group: 9, period: 4 },
+  { name: "Ni", atomic: 28, group: 10, period: 4 },
+  { name: "Cu", atomic: 29, group: 11, period: 4 },
+  { name: "Zn", atomic: 30, group: 12, period: 4 },
+  { name: "Ga", atomic: 31, group: 13, period: 4 },
+  { name: "Ge", atomic: 32, group: 14, period: 4 },
+  { name: "As", atomic: 33, group: 15, period: 4 },
+  { name: "Se", atomic: 34, group: 16, period: 4 },
+  { name: "Br", atomic: 35, group: 17, period: 4 },
+  { name: "Kr", atomic: 36, group: 18, period: 4 },
+  { name: "Rb", atomic: 37, group: 1, period: 5 },
+  { name: "Sr", atomic: 38, group: 2, period: 5 },
+  { name: "Y", atomic: 39, group: 3, period: 5 },
+  { name: "Zr", atomic: 40, group: 4, period: 5 },
+  { name: "Nb", atomic: 41, group: 5, period: 5 },
+  { name: "Mo", atomic: 42, group: 6, period: 5 },
+  { name: "Tc", atomic: 43, group: 7, period: 5 },
+  { name: "Ru", atomic: 44, group: 8, period: 5 },
+  { name: "Rh", atomic: 45, group: 9, period: 5 },
+  { name: "Pd", atomic: 46, group: 10, period: 5 },
+  { name: "Ag", atomic: 47, group: 11, period: 5 },
+  { name: "Cd", atomic: 48, group: 12, period: 5 },
+  { name: "In", atomic: 49, group: 13, period: 5 },
+  { name: "Sn", atomic: 50, group: 14, period: 5 },
+  { name: "Sb", atomic: 51, group: 15, period: 5 },
+  { name: "Te", atomic: 52, group: 16, period: 5 },
+  { name: "I", atomic: 53, group: 17, period: 5 },
+  { name: "Xe", atomic: 54, group: 18, period: 5 }
+];
+    let current = null;
+    let score = 0;
+    let highscore = localStorage.getItem("highscore") || 0;
+    document.getElementById("highscore").textContent = highscore;
+
+    let time = 15;
+    let timerInterval;
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      time = 15;
+      document.getElementById("timer").textContent = time;
+      timerInterval = setInterval(() => {
+        time--;
+        document.getElementById("timer").textContent = time;
+        if (time === 0) {
+          clearInterval(timerInterval);
+          document.getElementById("result").textContent = "⏰ زمان تموم شد!";
+          score = 0;
+          document.getElementById("score").textContent = score;
+          setTimeout(newElement, 2000);
+        }
+      }, 1000);
+    }
+
+    function newElement() {
+      current = elements[Math.floor(Math.random() * elements.length)];
+      document.getElementById("element").textContent = `عنصر: ${current.name} (عدد اتمی ${current.atomic})`;
+      document.getElementById("group").value = "";
+      document.getElementById("period").value = "";
+      document.getElementById("result").textContent = "";
+      startTimer();
+    }
+
+function checkAnswer() {
+  if (!current) return;
+
+  const group = parseInt(document.getElementById("group").value);
+  const period = parseInt(document.getElementById("period").value);
+  clearInterval(timerInterval);
+
+  if (group === current.group && period === current.period) {
+    score++;
+    document.getElementById("result").textContent = "✅ درست گفتی!";
+    document.getElementById("correctSound").play();
+    if (score > highscore) {
+      highscore = score;
+      localStorage.setItem("highscore", highscore);
+      document.getElementById("highscore").textContent = highscore;
+    }
+  } else {
+    score = 0;
+    document.getElementById("result").textContent =
+      `❌ اشتباه بود! جواب درست: گروه ${current.group}، دوره ${current.period}`;
+    document.getElementById("wrongSound").play();
+  }
+
+  document.getElementById("score").textContent = score;
+  setTimeout(newElement, 3000);
+}
+
+    newElement();
+  </script>
+</body>
+</html>
